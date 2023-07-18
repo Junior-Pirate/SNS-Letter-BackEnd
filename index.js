@@ -27,7 +27,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/test', (req, res) => {
-    const sql = 'SELECT * FROM test_name';
+    const sql = 'SELECT * FROM user';
 
     db.query(sql, (err, result) => {
         if (err) {
@@ -41,7 +41,7 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/test', (req, res) => {
-    const sql = 'INSERT INTO test_name(name) VALUES (?)';
+    const sql = 'INSERT INTO user(name) VALUES (?)';
     const name = req.body.name
 
     console.log(name);

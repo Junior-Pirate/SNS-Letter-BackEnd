@@ -121,4 +121,4 @@ dist
 package-lock.json
 
 #보안
-.conf/auth.js
+conf/auth.js
