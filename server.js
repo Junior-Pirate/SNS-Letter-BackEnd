@@ -1,21 +1,13 @@
 const express = require('express');
-const mysql = require('mysql');
+
 const bp = require("body-parser");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
 
-const dbconf = require("./conf/auth.js")
+const db = require("./db/auth.js")
 
 const app = express();
 const port = 9000;
-
-const db = mysql.createConnection(dbconf)
-db.connect(function (err) {
-    if (err) {
-        console.log("Database connection failed");
-        throw err;
-    }
-    console.log("Connected to the database");
-});
 
 app.use(bp.json());
 app.use(cors());
@@ -41,12 +33,12 @@ app.get('/test', (req, res) => {
 });
 
 app.post('/test', (req, res) => {
-    const sql = 'INSERT INTO user(name) VALUES (?)';
-    const name = req.body.name
+    const sql = 'INSERT INTO user(email,name,pw) VALUES (?,?,?)';
+    const {email,name,pw} = req.body
 
-    console.log(name);
+    params = [email,name,pw]
 
-    db.query(sql, name,(err, result) => {
+    db.query(sql, params,(err, result) => {
         if (err) {
             console.error(err);
             res.status(500).json({ error: 'Server Error' });
