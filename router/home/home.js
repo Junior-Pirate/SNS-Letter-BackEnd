@@ -23,17 +23,17 @@ router.get('/', async (req, res) => {
     });
 });
 
-router.post('/', async (req, res) => {
+router.get('/search', async (req, res) => {
     const sql = 'SELECT * FROM user WHERE email = ?';
-    const email = req.body.email
+    const email = req.query.email
 
-    db.query(sql, email,(err, result) => {
+    db.query(sql, [email],(err, result) => {
         if (err) {
             console.error(err);
             res.status(500).json({ error: 'Server Error' });
             return;
         }
-        res.json({success:true});
+        res.json(result);
     });
 });
 
