@@ -5,7 +5,7 @@ const port = 9000;
 
 const register = require("./router/register/register.js")
 const login = require("./router/login/login.js")
-const home = require("./router/home/home.js")
+const search = require("./router/search/search.js")
 
 app.get('/',(req,res)=>{
     res.send("main")
@@ -13,7 +13,7 @@ app.get('/',(req,res)=>{
 
 app.use('/register',register)
 app.use('/login',login)
-app.use('/home',home)
+app.use('/search',search)
 
 app.listen(port, () => {
     console.log('App listening on port ' + port);

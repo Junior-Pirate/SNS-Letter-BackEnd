@@ -23,7 +23,7 @@ router.get('/', async (req, res) => {
     });
 });
 
-router.get('/search', async (req, res) => {
+router.get('/', async (req, res) => {
     const sql = 'SELECT * FROM user WHERE email = ?';
     const email = req.query.email
 
