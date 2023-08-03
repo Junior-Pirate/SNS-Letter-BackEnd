@@ -3,11 +3,13 @@ const router = express.Router();
 const bcrypt = require("bcryptjs");
 const bp = require("body-parser");
 const cors = require("cors");
+//const cookieParser = require('cookie-parser');
 
 const db = require("../../db/auth.js")
 
 router.use(bp.json());
 router.use(cors());
+//router.use(cookieParser());
 
 router.post('/', async (req, res) => {
     const sql = 'SELECT * FROM user WHERE email = ?';
@@ -15,29 +17,29 @@ router.post('/', async (req, res) => {
     params = [email,pw]
     
     //email check
-    db.query(sql, params[0], (err,row)=>{
-        console.log(params[0])
-        console.log(row)
+    db.query(sql, params[0], (err,rows)=>{
         if (err) {
             console.error(err);
             res.status(500).json({ error: 'Server Error' });
             return;
         }
-        if (row.length > 0) {
+        if (rows.length > 0) {
             //db check
-            bcrypt.compare(params[1], row[0].pw,(err,result)=>{
+            bcrypt.compare(params[1], rows[0].pw,(err,result)=>{
                 if(result){
-                    console.log("login succeed!")
-                    res.json({success:true})
+                    // res.cookie("user",email,{
+                    //     expires: new Date(Date.now() + 900000),
+                    //     httpOnly: true
+                    // })
+                    res.status(200).json({message:'로그인 성공!'})
                 }
                 else{
-                    console.log("login failed!")
-                    res.json({success:false})
+                    res.status(401).json({message:'이메일 혹은 비밀번호가 틀립니다.'})
                 }
             })
-          } else {
-            console.log("Email does not exist")
-            res.json({ exists: false });
+          }
+          if(rows.length==0){
+            res.status(401).json({message:'이메일 혹은 비밀번호가 틀립니다.'});
           }
     })
 
