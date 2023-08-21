@@ -20,12 +20,12 @@ router.post('/', async (req, res) => {
         name === "" ||
         pw === ""
     ){
-        return res.json({ registerSuccess: false, message: "정보를 입력하세요" });
+        return res.status(401).json({ registerSuccess: false, message: "정보를 입력하세요" });
     }
 
     //비밀번호가 다르면 반환
     if(pw != again_pw){
-        return res.json({registerSuccess: false, message: "비밀번호가 같지 않습니다."})
+        return res.status(401).json({registerSuccess: false, message: "비밀번호가 같지 않습니다."})
     }
 
     //암호화
@@ -44,12 +44,12 @@ router.post('/', async (req, res) => {
             var sql = db.query('INSERT INTO user(email,name,pw) VALUES (?,?,?)',params,(err,result)=>{
                 if(err) throw err;
                 else{
-                    res.status(200).json({message:'로그인 성공'})
+                    res.status(200).json({registerSuccess: true, message:'로그인 성공'})
                 }
             })
         }
         if(rows.length!=0){
-            res.status(401).json({message:'이메일이 중복되었습니다.'})
+            res.status(401).json({registerSuccess: false, message:'이메일이 중복되었습니다.'})
         }
     });
 });
