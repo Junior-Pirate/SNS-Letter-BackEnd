@@ -71,18 +71,45 @@ function saveRefreshTokenToDatabase(email, refreshToken){
     });
 }
 
-// 리프레시 토큰을 이용하여 엑세스 토큰 재발급
-router.post('/token', async (req, res) => {
-    const refreshToken = req.body.refreshToken;
-    
-    const isValidRefreshToken = await checkRefreshTokenInDatabase(refreshToken);
-    if (isValidRefreshToken) {
-        const newAccessToken = jwt.sign({userID : "user"}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-        res.sendStatus(200).json({tokenReissue : true, accessToken: newAccessToken });
-    } else {
-        res.sendStatus(403).json({tokenReissue : false , message : "Refresh Token이 유효하지 않습니다. 다시 로그인하세요."});
-    }
+// 토큰검증 미들웨어
+router.post('/protected', authenticateToken, (req, res) => {
+    res.json({ message: 'This is a protected route.' });
 });
+async function authenticateToken(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+    
+    const refreshToken = req.body.refreshToken;
+
+    if (token === undefined){
+        return res.sendStatus(401).json({Certification : false, message : "사용 권한이 없습니다."})
+    }
+
+    const accessToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+        if (err) return res.sendStatus(403).json({Certification : false, message : "토큰 인증에 실패했습니다."});
+        req.user = user;
+        next();
+    });
+
+    const body = await checkRefreshTokenInDatabase(refreshToken);
+
+    if (accessToken === null){
+        if(body.refreshToken === undefined){ //두 토큰 모두 만료
+            return res.sendStatus(401).json({Certification : false, message : "사용 권한이 없습니다."})
+        } else{ //accessToken만 만료
+            const newAccessToken = jwt.sign({userID : body.email._id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+            res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true, maxAge: 900000 })
+            return res.sendStatus(200).json({Certification : true, newAccessToken, message : "access 토큰 발급"})
+        }
+    } else {
+        if (body.refreshToken === undefined){ //refreshToken만 만료
+            const newRefreshToken = jwt.sign({}, process.env.REFRESH_TOKEN_SECRET,{ expiresIn: '7d' })
+            saveRefreshTokenToDatabase(body.email, refreshToken);
+        } else{ //두 토큰 다 유효
+            next();
+        }
+    }
+}
 async function checkRefreshTokenInDatabase(refreshToken) {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM user WHERE refreshToken = ?';
@@ -93,7 +120,7 @@ async function checkRefreshTokenInDatabase(refreshToken) {
                 return;
             }
             if (rows.length > 0) {
-                //console.log(rows[0].refreshToken);
+                console.log(rows[0]);
                 resolve(rows[0]);
             } else {
                 resolve(null);
@@ -102,21 +129,5 @@ async function checkRefreshTokenInDatabase(refreshToken) {
     });
 }
 
-// 토큰검증 미들웨어
-router.get('/protected', authenticateToken, (req, res) => {
-    res.json({ message: 'This is a protected route.' });
-});
-function authenticateToken(req, res, next) {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    
-    if (token == null) return res.sendStatus(401);
-
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403);
-        req.user = user;
-        next();
-    });
-}
 
 module.exports = router;
