@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const bp = require("body-parser");
 
-const db = require("../../db/auth.js"); 
+const db = require("../../../db/auth.js"); 
 
 router.use(bp.json());
 

@@ -4,7 +4,7 @@ const bcrypt = require("bcryptjs");
 const bp = require("body-parser");
 const cors = require("cors");
 
-const db = require("../../db/auth.js")
+const db = require("../../../db/auth.js")
 
 router.use(bp.json());
 router.use(cors());
