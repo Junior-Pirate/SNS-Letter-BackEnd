@@ -15,17 +15,22 @@ router.post('/', async (req, res) => {
     params = [email,name,pw]
 
     //빈값이면 반환
-    if(
-        email === "" ||
-        name === "" ||
-        pw === ""
-    ){
-        return res.status(401).json({ registerSuccess: false, message: "정보를 입력하세요" });
+    if( email === "" ){
+        return res.json({ registerSuccess: false, message: "이메일을 입력하세요" });
+    }
+    else if(name === "" ){
+        return res.json({ registerSuccess: false, message: "이름을 입력하세요" });
+    }
+    else if(pw === ""){
+        return res.json({ registerSuccess: false, message: "비밀번호를 입력하세요" });
+    }
+    else if(again_pw === ""){
+        return res.json({ registerSuccess: false, message: "비밀번호 확인란을 입력하세요" });
     }
 
-    //비밀번호가 다르면 반환
+    
     if(pw != again_pw){
-        return res.status(401).json({registerSuccess: false, message: "비밀번호가 같지 않습니다."})
+        return res.json({registerSuccess: false, message: "비밀번호가 같지 않습니다."})
     }
 
     //암호화

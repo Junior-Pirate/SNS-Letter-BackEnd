@@ -21,6 +21,13 @@ router.post('/', async (req, res) => {
     const { email, pw } = req.body;
     const params = [email, pw];
 
+    if(email === ""){
+        return res.json({ loginSuccess: false, message: "이메일을 입력하세요" });
+    }
+    else if(pw === ""){
+        return res.json({ loginSuccess: false, message: "비밀번호를 입력하세요" });
+    }
+
     // email check
     db.query(sql, params[0], (err, rows) => {
         if (err) {
@@ -32,18 +39,23 @@ router.post('/', async (req, res) => {
             bcrypt.compare(params[1], rows[0].pw, (err, result) => {
                 if (result) {
                     const accessToken = jwt.sign({ userID: rows[0]._id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-                    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 900000 }); // 15분 (ms)
+                    res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 900000 });
                     
-                    const refreshToken = jwt.sign({ userID: rows[0]._id }, process.env.REFRESH_TOKEN_SECRET);
+                    const refreshToken = jwt.sign({ userID: rows[0]._id }, process.env.REFRESH_TOKEN_SECRET,{ expiresIn: '7d' });
                     saveRefreshTokenToDatabase(params[0], refreshToken);
 
-                    res.status(200).json({ accessToken, refreshToken ,message:"로그인성공!"});
+                    res.status(200).json({ 
+                        loginSuccess: true,
+                        accessToken, 
+                        refreshToken ,
+                        message:"로그인성공!"});
+
                 } else {
-                    res.status(401).json({ message: '이메일 혹은 비밀번호가 틀립니다.' });
+                    res.status(401).json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
                 }
             });
         } else {
-            res.status(401).json({ message: '이메일 혹은 비밀번호가 틀립니다.' });
+            res.status(401).json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
         }
     });
 });
@@ -52,6 +64,7 @@ function saveRefreshTokenToDatabase(email, refreshToken){
     db.query(sql, [refreshToken, email], (err, res) => {
         if (err) {
             console.error(err);
+            res.status(500).json({ error: 'Server Error' });
             return;
         }
         console.log("refrsesh token db저장")
@@ -65,9 +78,9 @@ router.post('/token', async (req, res) => {
     const isValidRefreshToken = await checkRefreshTokenInDatabase(refreshToken);
     if (isValidRefreshToken) {
         const newAccessToken = jwt.sign({userID : "user"}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-        res.json({ accessToken: newAccessToken });
+        res.sendStatus(200).json({tokenReissue : true, accessToken: newAccessToken });
     } else {
-        res.sendStatus(403); // 리프레시 토큰이 유효하지 않은 경우
+        res.sendStatus(403).json({tokenReissue : false , message : "Refresh Token이 유효하지 않습니다. 다시 로그인하세요."});
     }
 });
 async function checkRefreshTokenInDatabase(refreshToken) {
