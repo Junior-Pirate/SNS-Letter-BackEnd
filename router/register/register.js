@@ -11,8 +11,22 @@ router.use(cors());
 
 router.post('/', async (req, res) => {
     const sql = 'SELECT email FROM user where email = ?'
-    const {email,name,pw} = req.body
+    const {email,name,pw, again_pw} = req.body
     params = [email,name,pw]
+
+    //빈값이면 반환
+    if(
+        email === "" ||
+        name === "" ||
+        pw === ""
+    ){
+        return res.json({ registerSuccess: false, message: "정보를 입력하세요" });
+    }
+
+    //비밀번호가 다르면 반환
+    if(pw != again_pw){
+        return res.json({registerSuccess: false, message: "비밀번호가 같지 않습니다."})
+    }
 
     //암호화
     const salt = await bcrypt.genSalt(10)
