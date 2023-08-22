@@ -23,33 +23,32 @@ async function authenticateToken(req, res, next) {
     
     const refreshToken = req.body.refreshToken;
 
+    console.log("accessToken :" , token)
+    console.log("refreshToken :" , refreshToken)
     if (token === undefined){
-        return res.sendStatus(401).json({Certification : false, message : "사용 권한이 없습니다."})
+        return res.json({Certification : false, message : "사용 권한이 없습니다."})
     }
 
     const accessToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) return res.sendStatus(403).json({Certification : false, message : "토큰 인증에 실패했습니다."});
+        if (err) return res.json({Certification : false, message : "토큰 인증에 실패했습니다."});
         req.user = user;
         next();
     });
 
     const body = await checkRefreshTokenInDatabase(refreshToken);
+    console.log("body : ",body)
 
     if (accessToken === null){
-        if(body.refreshToken === undefined){ //두 토큰 모두 만료
-            return res.sendStatus(401).json({Certification : false, message : "사용 권한이 없습니다."})
+        if(body === null){ //두 토큰 모두 만료
+            return res.json({Certification : false, message : "사용 권한이 없습니다."})
         } else{ //accessToken만 만료
             const newAccessToken = jwt.sign({userID : body.email._id}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
             res.cookie('accessToken', newAccessToken, { httpOnly: true, secure: true, maxAge: 900000 })
-            return res.sendStatus(200).json({Certification : true, newAccessToken, message : "access 토큰 발급"})
+            return res.json({Certification : true, newAccessToken, message : "access 토큰 발급"})
         }
-    } else {
-        if (body.refreshToken === undefined){ //refreshToken만 만료
-            const newRefreshToken = jwt.sign({}, process.env.REFRESH_TOKEN_SECRET,{ expiresIn: '7d' })
-            saveRefreshTokenToDatabase(body.email, refreshToken);
-        } else{ //두 토큰 다 유효
-            next();
-        }
+    } else { //accessToken이 존재하면 통과
+        if(body === null)
+        next();
     }
 }
 async function checkRefreshTokenInDatabase(refreshToken) {
