@@ -3,7 +3,7 @@ const cors = require("cors");
 const app = express();
 
 var corOptions = {
-    origin: "https://localhost:9000",
+    origin: "*",
 };
 
 app.set("port", process.env.PORT || 9000);
