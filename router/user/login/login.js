@@ -59,14 +59,22 @@ const login = async (req, res) => {
 
 async function saveRefreshTokenToDatabase(userId, refreshToken) {
     try {
-        await Token.create({
-            userId: userId,
-            tokenValue: refreshToken,
-          });
+        const [numUpdated, updatedRows] = await Token.update(
+            { tokenValue: refreshToken },
+            { where: { userId } }
+        );
+
+        if (numUpdated === 0) {
+            await Token.create({
+                userId: userId,
+                tokenValue: refreshToken,
+            });
+        }
+
         console.log("refresh token DB 저장");
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Server Error' });
+        throw error;
     }
 }
 
