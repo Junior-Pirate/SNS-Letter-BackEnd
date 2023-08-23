@@ -5,7 +5,7 @@ const cors = require("cors");
 const cookieParser = require('cookie-parser');
 const dotenv = require("dotenv");
 const jwt = require('jsonwebtoken');
-const db = require("../../db/auth.js");
+const db = require('../../models');
 
 dotenv.config();
 
