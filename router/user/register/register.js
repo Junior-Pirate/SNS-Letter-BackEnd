@@ -7,7 +7,7 @@ const db = require('../../../models')
 router.use(express.json());
 const User = db.user;
 
-router.post('/', async (req, res) => {
+const register = async (req, res) => {
     const {email,name,pw, again_pw} = req.body
 
 
@@ -57,6 +57,6 @@ router.post('/', async (req, res) => {
         console.error(error)
         res.status(500).json({ error: 'Server Error' });
     }
-});
+};
 
-module.exports = router
+module.exports = {register}

@@ -16,7 +16,7 @@ router.use(cookieParser());
 
 
 
-router.post('/', async (req, res) => {
+const login = async (req, res) => {
     const sql = 'SELECT * FROM user WHERE email = ?';
     const { email, pw } = req.body;
     const params = [email, pw];
@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
             res.status(401).json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
         }
     });
-});
+};
 function saveRefreshTokenToDatabase(email, refreshToken){
     const sql = 'UPDATE user SET refreshToken = ? WHERE email = ?';
     db.query(sql, [refreshToken, email], (err, res) => {
@@ -72,4 +72,4 @@ function saveRefreshTokenToDatabase(email, refreshToken){
 }
 
 
-module.exports = router;
+module.exports = {login};

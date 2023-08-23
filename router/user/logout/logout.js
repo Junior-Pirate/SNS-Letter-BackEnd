@@ -6,7 +6,7 @@ const db = require("../../../db/auth.js");
 
 router.use(bp.json());
 
-router.post('/', async (req, res) => {
+const logout = async (req, res) => {
     const { email } = req.body;
 
     const refreshToken = await getRefreshTokenByEmail(email);
@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
     } else {
         res.status(404).json({ message: '해당 사용자를 찾을 수 없거나 리프레시 토큰이 없습니다.' });
     }
-});
+};
 
 async function getRefreshTokenByEmail(email) {
     // 이메일을 통해 리프레시 토큰을 확인하는 로직
@@ -51,4 +51,4 @@ async function deleteRefreshTokenInDatabase(refreshToken) {
     });
 }
 
-module.exports = router;
+module.exports = {logout};

@@ -6,7 +6,7 @@ const cookieParser = require('cookie-parser');
 const dotenv = require("dotenv");
 const jwt = require('jsonwebtoken');
 
-const db = require("../../../db/auth.js");
+const db = require("../../db/auth.js");
 dotenv.config();
 
 router.use(bp.json());
@@ -14,10 +14,7 @@ router.use(cors());
 router.use(cookieParser());
 
 // 토큰검증 미들웨어
-router.post('/', authenticateToken, (req, res) => {
-    res.json({Certification : true, message: '인증되었습니다.' });
-});
-async function authenticateToken(req, res, next) {
+const check = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
     
@@ -50,7 +47,9 @@ async function authenticateToken(req, res, next) {
         if(body === null)
         next();
     }
-}
+
+    res.json({Certification : true, message: '인증되었습니다.' });
+};
 async function checkRefreshTokenInDatabase(refreshToken) {
     return new Promise((resolve, reject) => {
         const sql = 'SELECT * FROM user WHERE refreshToken = ?';
@@ -71,4 +70,4 @@ async function checkRefreshTokenInDatabase(refreshToken) {
 }
 
 
-module.exports = router;
+module.exports = {check};
