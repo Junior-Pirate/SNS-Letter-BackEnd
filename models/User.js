@@ -27,5 +27,10 @@ module.exports = (sequelize, DataTypes) => {
             tableName: 'user' //설정안하면 테이블의 기본 이름이 users로 바뀜
         }
     );
+
+    User.associate = (models) => {
+        User.hasOne(models.Token, { foreignKey: 'userId', as: 'token' });
+    };
+
     return User;
 }
