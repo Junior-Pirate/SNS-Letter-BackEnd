@@ -18,12 +18,13 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             password: {
-                type: DataTypes.STRING(20),
+                type: DataTypes.STRING(100),
                 allowNull: false,
             }
         },
         {
             timestamps: false,
+            tableName: 'user' //설정안하면 테이블의 기본 이름이 users로 바뀜
         }
     );
     return User;
