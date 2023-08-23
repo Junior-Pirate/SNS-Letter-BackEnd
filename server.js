@@ -1,8 +1,19 @@
 const express = require('express');
+const cors = require("cors");
 const app = express();
-const session = require('express-session');
 
-const port = 9000;
+var corOptions = {
+    origin: "https://localhost:9000",
+};
+
+app.set("port", process.env.PORT || 9000);
+
+app.use(cors(corOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+require("./models/index");
+
 
 const register = require("./router/user/register/register.js")
 const login = require("./router/user/login/login.js")
@@ -27,6 +38,6 @@ app.get('/',(req,res)=>{
     res.send("main")
 })
 
-app.listen(port, () => {
-    console.log('App listening on port ' + port);
+app.listen(app.get("port"), () => {
+    console.log('App listening on port ' + app.get("port"));
 });

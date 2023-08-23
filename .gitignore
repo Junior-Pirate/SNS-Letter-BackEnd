@@ -124,3 +124,4 @@ package-lock.json
 conf/auth.js
 db/auth.js
 router/kakao/auth.js
+config/config.json
