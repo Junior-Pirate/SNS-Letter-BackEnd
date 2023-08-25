@@ -35,13 +35,15 @@ const login = async (req, res) => {
 
         bcrypt.compare(pw, user.password, (err, result) => {
             if (result) {
-                const accessToken = jwt.sign({ userID: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
-                res.cookie('accessToken', accessToken, { httpOnly: true, secure: true, maxAge: 900000 });
-
+                const accessToken = jwt.sign({ userID: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
+                
                 const refreshToken = jwt.sign({ userID: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
                 saveRefreshTokenToDatabase(user.id, refreshToken);
 
-                res.status(200).json({
+                
+                res.cookie('accessToken', accessToken, { path: '/login', httpOnly: true, secure: true, maxAge: 60 })
+                    .status(200)
+                    .json({
                     loginSuccess: true,
                     accessToken,
                     refreshToken,

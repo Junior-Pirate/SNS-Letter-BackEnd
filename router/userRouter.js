@@ -10,7 +10,7 @@ router.post('/register',userRegister.register)
 
 router.post('/login',userLogin.login)
 
-router.use('/logout',userLogout.logout)
+router.post('/logout',userLogout.logout)
 
 router.get('/refresh',userCheck.verifyAccessTokenReissue)
 

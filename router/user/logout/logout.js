@@ -1,53 +1,71 @@
 const express = require('express');
 const router = express.Router();
 const bp = require("body-parser");
-
+const db = require('../../../models');
 
 router.use(bp.json());
 
-const logout = async (req, res) => {
-    const { email } = req.body;
+const User = db.user;
+const Token = db.token;
 
-    const refreshToken = await getRefreshTokenByEmail(email);
-    if (refreshToken) {
-        deleteRefreshTokenInDatabase(refreshToken);
-        res.clearCookie('accessToken');
-        res.clearCookie('refreshToken');
-        res.status(200).json({ message: '로그아웃 되었습니다.' });
-    } else {
-        res.status(404).json({ message: '해당 사용자를 찾을 수 없거나 리프레시 토큰이 없습니다.' });
+const logout = async (req, res) => {
+    const email= req.body.email;
+
+    try {
+        const user = await User.findOne({
+            where: {
+                email: email
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ message: '해당 사용자를 찾을 수 없습니다.' });
+        }
+
+        const refreshToken = await getRefreshTokenByUserId(user.id);
+
+        if (refreshToken) {
+            await deleteRefreshTokenInDatabase(refreshToken);
+            
+            res.clearCookie('accessToken',{path: '/login'});
+            res.clearCookie('refreshToken');
+
+            res.status(200).json({ message: '로그아웃 되었습니다.' });
+        } else {
+            res.status(404).json({ message: '리프레시 토큰이 없습니다.' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Server Error' });
     }
 };
 
-async function getRefreshTokenByEmail(email) {
-    // 이메일을 통해 리프레시 토큰을 확인하는 로직
-    return new Promise((resolve, reject) => {
-        const sql = 'SELECT refreshToken FROM user WHERE email = ?';
-        db.query(sql, [email], (err, rows) => {
-            if (err) {
-                console.error(err);
-                reject(err);
-                return;
-            }
-            if (rows.length > 0) {
-                resolve(rows[0].refreshToken);
-            } else {
-                resolve(null);
+async function getRefreshTokenByUserId(userId) {
+    try {
+        const token = await Token.findOne({
+            where: {
+                userId: userId
             }
         });
-    });
+        return token ? token.tokenValue : null;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
 
 async function deleteRefreshTokenInDatabase(refreshToken) {
-    // 데이터베이스에서 리프레시 토큰 삭제 로직
-    const sql = 'UPDATE user SET refreshToken = NULL WHERE refreshToken = ?';
-    db.query(sql, [refreshToken], (err, res) => {
-        if (err) {
-            console.error(err);
-            return;
-        }
+    try {
+        await Token.destroy({
+            where: {
+                tokenValue: refreshToken
+            }
+        });
         console.log("리프레시 토큰이 데이터베이스에서 삭제되었습니다.");
-    });
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
 }
 
 module.exports = {logout};
