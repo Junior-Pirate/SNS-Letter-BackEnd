@@ -123,3 +123,4 @@ package-lock.json
 #보안
 router/kakao/auth.js
 config/config.json
+migrations
