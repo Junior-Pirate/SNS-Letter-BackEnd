@@ -24,6 +24,7 @@ db.Sequelize = Sequelize;
 //db에 테이블 추가
 db.user = require("./User.js")(sequelize,DataTypes);
 db.token = require("./Token.js")(sequelize,DataTypes);
+db.letter = require("./Letter.js")(sequelize,DataTypes);
 
 
 sequelize.sync({force:false}).then(()=>{
