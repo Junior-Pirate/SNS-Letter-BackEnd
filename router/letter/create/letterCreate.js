@@ -11,6 +11,14 @@ const create = async (req, res) => {
     const { nickname, title, content } = req.body;
     const userId = req.userID;
 
+    if (nickname === "") {
+        return res.json({ loginSuccess: false, message: "별명을 입력하세요" });
+    } else if (title === "") {
+        return res.json({ loginSuccess: false, message: "제목을 입력하세요" });
+    } else if (content === "") {
+        return res.json({ loginSuccess: false, message: "내용을 입력하세요" });
+    }
+
     console.log("userId : ", userId)
 
     try {
