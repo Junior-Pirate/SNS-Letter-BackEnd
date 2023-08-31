@@ -27,6 +27,8 @@ const auth = async (req, res, next) => {
             console.log("인증 통과")
             next();
         }
+    } else{ //토큰이 헤더에 없는경우
+        return res.send({result: false, message: "토큰이 포함되어 있지 않습니다."})
     }
 }
 
