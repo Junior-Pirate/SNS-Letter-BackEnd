@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
                 autoIncrement: true,
                 primaryKey: true,
             },
+            nickname: {
+                type: DataTypes.STRING(10),
+                allowNull: false,
+            },
             title: {
                 type: DataTypes.STRING(100),
                 allowNull: false,
@@ -19,10 +23,15 @@ module.exports = (sequelize, DataTypes) => {
             userId: {
                 type: DataTypes.INTEGER(11),
                 allowNull: false,
-            }
+            },
+            createdAt: {
+                type: DataTypes.DATE,
+                allowNull: false,
+                defaultValue: DataTypes.NOW,
+            },
         },
         {
-            timestamps: true,
+            timestamps: false,
             tableName: 'letter'
         }
     );
