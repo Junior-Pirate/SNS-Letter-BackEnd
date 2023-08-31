@@ -17,10 +17,11 @@ require("./models/index");
 
 const userRouter = require("./router/userRouter.js")
 const kakao_login = require("./router/kakao/kakao")
-const letter = require("./router/letter/letter.js")
+const letterRouter = require("./router/letterRouter.js")
 
 app.use("/user",userRouter)
 app.use('/kakao',kakao_login)
+app.use('/letter',letterRouter)
 
 //세션을 활용해서 카카오에서 던져주는 token을 저장
 
