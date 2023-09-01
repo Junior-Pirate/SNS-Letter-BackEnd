@@ -10,11 +10,11 @@ const create = async (req, res) => {
     const userId = req.userID;
 
     if (nickname === "") {
-        return res.json({ loginSuccess: false, message: "별명을 입력하세요" });
+        return res.json({ LetterCreate: false, message: "별명을 입력하세요" });
     } else if (title === "") {
-        return res.json({ loginSuccess: false, message: "제목을 입력하세요" });
+        return res.json({ LetterCreate: false, message: "제목을 입력하세요" });
     } else if (content === "") {
-        return res.json({ loginSuccess: false, message: "내용을 입력하세요" });
+        return res.json({ LetterCreate: false, message: "내용을 입력하세요" });
     }
 
     console.log("userId : ", userId)
@@ -27,7 +27,7 @@ const create = async (req, res) => {
         });
 
         if (!user) {
-            return res.json({ success: false, message: "해당 사용자는 존재하지 않습니다" });
+            return res.json({ LetterCreate: false, message: "해당 사용자는 존재하지 않습니다" });
         }
 
         const createdLetter = await Letter.create({
@@ -37,10 +37,10 @@ const create = async (req, res) => {
             userId: userId
         });
         console.log(createdLetter)
-        res.status(201).json({ success: true, message: "편지 작성이 완료되었습니다!" });
+        res.status(201).json({ LetterCreate: true, message: "편지 작성이 완료되었습니다!" });
     } catch (error) {
         console.error(error);
-        res.status(500).json({ success: false, message: "Server Error" });
+        res.status(500).json({ LetterCreate: false, message: "Server Error" });
     }
 }
 
