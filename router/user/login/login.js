@@ -1,14 +1,9 @@
-const express = require('express');
-const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require('jsonwebtoken');
 const db = require('../../../models');
 const dotenv = require("dotenv");
-const cookieParser = require('cookie-parser');
 dotenv.config();
 
-router.use(express.json());
-router.use(cookieParser());
 
 const User = db.user;
 const Token = db.token;
@@ -33,20 +28,18 @@ const login = async (req, res) => {
             return res.status(401).json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
         }
 
-        bcrypt.compare(pw, user.password, (err, result) => {
+        bcrypt.compare(pw, user.password, async (err, result) => {
             if (result) {
                 const accessToken = jwt.sign({ userID: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
                 
                 const refreshToken = jwt.sign({ userID: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-                saveRefreshTokenToDatabase(user.id, refreshToken);
-
+                const tokenId = await saveRefreshTokenToDatabase(user.id, refreshToken);
                 
-                res.cookie('accessToken', accessToken, { path: '/login', httpOnly: true, secure: true, maxAge: 60 })
-                    .status(200)
+                res.status(200)
                     .json({
                     loginSuccess: true,
                     accessToken,
-                    refreshToken,
+                    tokenId,
                     message: "로그인 성공!"
                 });
             } else {
@@ -61,23 +54,28 @@ const login = async (req, res) => {
 
 async function saveRefreshTokenToDatabase(userId, refreshToken) {
     try {
-        const [numUpdated, updatedRows] = await Token.update(
-            { tokenValue: refreshToken },
-            { where: { userId } }
-        );
+        let tokenInstance = await Token.findOne({
+            where: {
+                userId: userId
+            }
+        });
 
-        if (numUpdated === 0) {
-            await Token.create({
+        if (!tokenInstance) {
+            tokenInstance = await Token.create({
                 userId: userId,
                 tokenValue: refreshToken,
             });
+        } else {
+            await tokenInstance.update({ tokenValue: refreshToken });
         }
 
-        console.log("refresh token DB 저장");
+        console.log("refresh token DB 저장, Token ID:", tokenInstance.id);
+        return tokenInstance.id;
     } catch (error) {
         console.error(error);
         throw error;
     }
 }
+
 
 module.exports = { login };
