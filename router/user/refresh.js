@@ -18,9 +18,8 @@ const Token = db.token;
 
 // access 토큰을 재발급하는 미들웨어
 const verifyAccessTokenReissue = async (req, res, next) => {
-    if(req.headers['authorization'] && req.headers["refresh"]){
+    if(req.headers['authorization']){
         const token = req.headers['authorization'].split(' ')[1];
-        const refreshToken = req.headers["refresh"];
         
         //access 토큰 검증
         const accessResult = accessVerify(token);
@@ -34,7 +33,7 @@ const verifyAccessTokenReissue = async (req, res, next) => {
         console.log(decoded)
 
         //refresh 토큰 검증
-        const refreshResult = await refreshVerify(refreshToken,decoded.userID);
+        const refreshResult = await refreshVerify(decoded.userID);
     
         //access 토큰이 만료되었다면
         if(accessResult.ok === false && accessResult.message === "jwt expired"){
@@ -43,13 +42,12 @@ const verifyAccessTokenReissue = async (req, res, next) => {
                 res.status(401).send({result: false, message: "다시 로그인해주세요."})
             }
             else{
-                const newAccessToken = jwt.sign({ userID: decoded.userID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '15m' });
+                const newAccessToken = jwt.sign({ userID: decoded.userID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
                 
                 res.status(200).send({
                     Certification: true, 
                     data:{
-                        accessToken: newAccessToken,
-                        refreshToken: refreshToken
+                        accessToken: newAccessToken
                 }})
             }
         } else { //access 토큰이 만료되지 않은 경우
@@ -78,39 +76,42 @@ const accessVerify = (token) => {
     }
 }
 
-//refresh 토큰 검증
-const refreshVerify = async (token, userId) => {
+//refresh 토큰 검증 및 refreshToken 반환
+const refreshVerify = async (userId) => {
     try {
         const refreshData = await Token.findOne({
             where:{
                 userId: userId
             }
-        })
-        console.log("refreshToken DB에서 찾기 : ",refreshData.dataValues.tokenValue)
-        if(token === refreshData.dataValues.tokenValue){
-            try{
-                jwt.verify(token, process.env.REFRESH_TOKEN_SECRET);
+        });
+        
+        if (refreshData) {
+            try {
+                console.log("token 값 : ",refreshData.dataValues.tokenValue)
+                jwt.verify(refreshData.dataValues.tokenValue, process.env.REFRESH_TOKEN_SECRET);
                 return {
                     ok: true,
+                    refreshToken: refreshData.dataValues.tokenValue, // refreshToken 반환
                 };
-            } catch (err){
+            } catch (err) {
                 return {
                     ok: false,
                     message: "인증 안됨",
                 };
             }
-        } else{
+        } else {
             return {
                 ok: false,
                 message: "토큰이 다름",
             };
         }
-    } catch(err){
+    } catch (err) {
         return {
             ok: false,
             message: "서버 문제",
         };
     }
 }
+
 
 module.exports = { verifyAccessTokenReissue };
