@@ -30,16 +30,15 @@ const login = async (req, res) => {
 
         bcrypt.compare(pw, user.password, async (err, result) => {
             if (result) {
-                const accessToken = jwt.sign({ userID: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1m' });
+                const accessToken = jwt.sign({ userID: user.id }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
                 
                 const refreshToken = jwt.sign({ userID: user.id }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: '7d' });
-                const tokenId = await saveRefreshTokenToDatabase(user.id, refreshToken);
+                await saveRefreshTokenToDatabase(user.id, refreshToken);
                 
                 res.status(200)
                     .json({
                     loginSuccess: true,
                     accessToken,
-                    tokenId,
                     message: "로그인 성공!"
                 });
             } else {
@@ -68,9 +67,6 @@ async function saveRefreshTokenToDatabase(userId, refreshToken) {
         } else {
             await tokenInstance.update({ tokenValue: refreshToken });
         }
-
-        console.log("refresh token DB 저장, Token ID:", tokenInstance.id);
-        return tokenInstance.id;
     } catch (error) {
         console.error(error);
         throw error;
