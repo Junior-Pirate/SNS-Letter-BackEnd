@@ -25,7 +25,7 @@ const login = async (req, res) => {
         });
 
         if (!user) {
-            return res.status(401).json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
+            return res.json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
         }
 
         bcrypt.compare(pw, user.password, async (err, result) => {
@@ -42,7 +42,7 @@ const login = async (req, res) => {
                     message: "로그인 성공!"
                 });
             } else {
-                res.status(401).json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
+                res.json({ loginSuccess: false, message: '이메일 혹은 비밀번호가 틀립니다.' });
             }
         });
     } catch (error) {
