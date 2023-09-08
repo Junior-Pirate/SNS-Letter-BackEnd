@@ -9,26 +9,22 @@ const User = db.user;
 const Token = db.token;
 
 const logout = async (req, res) => {
-    const email= req.body.email;
-
+    const userId = req.userID;
     try {
         const user = await User.findOne({
             where: {
-                email: email
+                id: userId
             }
         });
 
         if (!user) {
-            return res.status(404).json({ message: '해당 사용자를 찾을 수 없습니다.' });
+            return res.status(401).json({ message: '해당 사용자를 찾을 수 없습니다.' });
         }
 
-        const refreshToken = await getRefreshTokenByUserId(user.id);
+        const refreshToken = await getRefreshTokenByUserId(userId);
 
         if (refreshToken) {
             await deleteRefreshTokenInDatabase(refreshToken);
-            
-            res.clearCookie('accessToken',{path: '/login'});
-            res.clearCookie('refreshToken');
 
             res.status(200).json({ message: '로그아웃 되었습니다.' });
         } else {
