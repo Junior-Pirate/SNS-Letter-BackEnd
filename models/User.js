@@ -28,7 +28,11 @@ module.exports = (sequelize, DataTypes) => {
             finishedAt: {
                 type: DataTypes.DATE,
                 allowNull: true,
-            }
+            },
+            letterbox: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
         },
         {
             timestamps: false,
