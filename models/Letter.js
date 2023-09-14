@@ -29,6 +29,16 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
                 defaultValue: DataTypes.NOW,
             },
+            deadline: {
+                type: DataTypes.INTEGER(1),
+                allowNull: false,
+                defaultValue: 0, 
+                validate: {
+                    min: 0, 
+                    max: 6, 
+                    isInt: true,
+                },
+            },
         },
         {
             timestamps: false,
