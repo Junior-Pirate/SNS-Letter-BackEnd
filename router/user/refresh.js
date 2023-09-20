@@ -27,7 +27,7 @@ const verifyAccessTokenReissue = async (req, res, next) => {
 
         const decoded = jwt.decode(token);
         if(!decoded){
-            res.status(401).send({result: false, message: "권한이 없습니다."})
+            res.status(403).send({Certification: false, message: "권한이 없습니다."})
         }
 
         console.log(decoded)
@@ -39,7 +39,7 @@ const verifyAccessTokenReissue = async (req, res, next) => {
         if(accessResult.ok === false && accessResult.message === "jwt expired"){
             //refresh 토큰도 만료
             if(refreshResult.ok === false){
-                res.status(401).send({result: false, message: "다시 로그인해주세요."})
+                res.status(403).send({Certification: false, message: "다시 로그인해주세요."})
             }
             else{
                 const newAccessToken = jwt.sign({ userID: decoded.userID }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30s' });
@@ -52,10 +52,10 @@ const verifyAccessTokenReissue = async (req, res, next) => {
             }
         } else { //access 토큰이 만료되지 않은 경우
             console.log(accessResult)
-            res.status(400).send({result: false, message: "Access 토큰이 만료되지 않았습니다."})
+            res.status(403).send({Certification: false, message: "Access 토큰이 만료되지 않았습니다."})
         }
     } else{ //토큰이 헤더에 없는경우
-        res.status(400).send({result: false, message: "토큰이 포함되어 있지 않습니다."})
+        res.status(404).send({Certification: false, message: "토큰이 포함되어 있지 않습니다."})
     }
 };
 
@@ -87,7 +87,7 @@ const refreshVerify = async (userId) => {
         
         if (refreshData) {
             try {
-                console.log("token 값 : ",refreshData.dataValues.tokenValue)
+                //console.log("token 값 : ",refreshData.dataValues.tokenValue)
                 jwt.verify(refreshData.dataValues.tokenValue, process.env.REFRESH_TOKEN_SECRET);
                 return {
                     ok: true,

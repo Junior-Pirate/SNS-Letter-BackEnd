@@ -25,11 +25,10 @@ const logout = async (req, res) => {
 
         if (refreshToken) {
             await deleteRefreshTokenInDatabase(refreshToken);
-
-            res.status(200).json({ message: '로그아웃 되었습니다.' });
-        } else {
-            res.status(404).json({ message: '리프레시 토큰이 없습니다.' });
         }
+        
+        res.status(200).json({ message: '로그아웃 되었습니다.' });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server Error' });
@@ -57,7 +56,6 @@ async function deleteRefreshTokenInDatabase(refreshToken) {
                 tokenValue: refreshToken
             }
         });
-        console.log("리프레시 토큰이 데이터베이스에서 삭제되었습니다.");
     } catch (error) {
         console.error(error);
         throw error;

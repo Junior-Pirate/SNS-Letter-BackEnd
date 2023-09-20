@@ -25,7 +25,7 @@ const create = async (req, res) => {
         });
 
         if (!user) {
-            return res.json({ LetterCreate: false, message: "해당 사용자는 존재하지 않습니다" });
+            return res.status(404).json({ LetterCreate: false, message: "해당 사용자는 존재하지 않습니다" });
         }
 
         //시간 계산

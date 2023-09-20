@@ -6,7 +6,7 @@ const list = async (req, res) => {
     const { userId, deadline } = req.query;
 
     if (!userId || !deadline) {
-        return res.status(400).json({ LetterList: false, message: "userId와 deadline을 모두 제공해야 합니다." });
+        return res.status(401).json({ LetterList: false, message: "userId와 deadline을 모두 제공해야 합니다." });
     }
 
     try {
