@@ -124,3 +124,5 @@ package-lock.json
 router/kakao/auth.js
 config/config.json
 migrations
+
+models/*.js

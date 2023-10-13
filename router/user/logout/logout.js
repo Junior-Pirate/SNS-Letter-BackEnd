@@ -9,31 +9,26 @@ const User = db.user;
 const Token = db.token;
 
 const logout = async (req, res) => {
-    const email= req.body.email;
-
+    const userId = req.userID;
     try {
         const user = await User.findOne({
             where: {
-                email: email
+                id: userId
             }
         });
 
         if (!user) {
-            return res.status(404).json({ message: '해당 사용자를 찾을 수 없습니다.' });
+            return res.status(401).json({ message: '해당 사용자를 찾을 수 없습니다.' });
         }
 
-        const refreshToken = await getRefreshTokenByUserId(user.id);
+        const refreshToken = await getRefreshTokenByUserId(userId);
 
         if (refreshToken) {
             await deleteRefreshTokenInDatabase(refreshToken);
-            
-            res.clearCookie('accessToken',{path: '/login'});
-            res.clearCookie('refreshToken');
-
-            res.status(200).json({ message: '로그아웃 되었습니다.' });
-        } else {
-            res.status(404).json({ message: '리프레시 토큰이 없습니다.' });
         }
+        
+        res.status(200).json({ message: '로그아웃 되었습니다.' });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server Error' });
@@ -61,7 +56,6 @@ async function deleteRefreshTokenInDatabase(refreshToken) {
                 tokenValue: refreshToken
             }
         });
-        console.log("리프레시 토큰이 데이터베이스에서 삭제되었습니다.");
     } catch (error) {
         console.error(error);
         throw error;

@@ -20,7 +20,19 @@ module.exports = (sequelize, DataTypes) => {
             password: {
                 type: DataTypes.STRING(255),
                 allowNull: false,
-            }
+            },
+            startedAt: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
+            finishedAt: {
+                type: DataTypes.DATE,
+                allowNull: true,
+            },
+            letterbox: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false,
+            },
         },
         {
             timestamps: false,
@@ -30,6 +42,7 @@ module.exports = (sequelize, DataTypes) => {
 
     User.associate = (models) => {
         User.hasOne(models.Token, { foreignKey: 'userId', as: 'token' });
+        User.hasMany(models.Token, { foreignKey: 'userId', as: 'letter' });
     };
 
     return User;
