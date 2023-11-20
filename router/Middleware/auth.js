@@ -12,19 +12,19 @@ const auth = async (req, res, next) => {
         
         const decoded = jwt.decode(token);
         if(!decoded){
-            return res.state(403).send({auth: false, message: "권한이 없습니다."})
+            return res.status(403).send({auth: false, message: "권한이 없습니다."})
         }
 
         if(accessResult.ok === false && accessResult.message === "jwt expired"){
-            return res.state(401).send({auth: false, message: "Access 토큰이 만료되었습니다.(refresh)"})
+            return res.status(401).send({auth: false, message: "Access 토큰이 만료되었습니다.(refresh)"})
         }
         const userResult = await findUser(decoded.userID)
-        if(userResult.ok === true){
+        if(userResult.ok === true){g
             req.userID = decoded.userID
             next();
         }
     } else{ //토큰이 헤더에 없는경우
-        return res.state(404).send({auth: false, message: "토큰이 포함되어 있지 않습니다."})
+        return res.status(404).send({auth: false, message: "토큰이 포함되어 있지 않습니다."})
     }
 }
 
