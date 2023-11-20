@@ -19,7 +19,7 @@ const auth = async (req, res, next) => {
             return res.status(401).send({auth: false, message: "Access 토큰이 만료되었습니다.(refresh)"})
         }
         const userResult = await findUser(decoded.userID)
-        if(userResult.ok === true){g
+        if(userResult.ok === true){
             req.userID = decoded.userID
             next();
         }
