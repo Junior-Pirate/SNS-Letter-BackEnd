@@ -35,7 +35,7 @@ const letterBoxCreate = async (req, res) => {
             where : {id: userId}
         })
         
-        return res.status(200).json({LetterBoxCreate: true, message: "편지함 생성에 성공했습니다!", userId : userId});
+        return res.status(200).json({LetterBoxCreate: true, message: "편지함 생성에 성공했습니다!", userId : user.id});
     } catch (error) {
         console.error(error);
         return res.json({LetterBoxCreate: false, message: "편지함 생성 실패 - 서버 문제"});
